@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Terms and Conditions — Spendly{% endblock %}
+
+{% block head %}
+<style>
+    .terms-section {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 4rem 2rem 6rem;
+    }
+
+    .terms-header {
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .terms-badge {
+        display: inline-block;
+        background: var(--accent-light);
+        color: var(--accent);
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        margin-bottom: 1.25rem;
+    }
+
+    .terms-title {
+        font-family: var(--font-display);
+        font-size: clamp(2rem, 4vw, 3rem);
+        line-height: 1.15;
+        color: var(--ink);
+        margin-bottom: 0.75rem;
+    }
+
+    .terms-meta {
+        font-size: 0.875rem;
+        color: var(--ink-faint);
+    }
+
+    .terms-body h2 {
+        font-family: var(--font-display);
+        font-size: 1.35rem;
+        color: var(--ink);
+        margin-top: 2.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .terms-body p {
+        font-size: 0.95rem;
+        color: var(--ink-muted);
+        line-height: 1.8;
+        margin-bottom: 1rem;
+    }
+
+    .terms-body ul {
+        margin: 0.5rem 0 1rem 1.5rem;
+        color: var(--ink-muted);
+        font-size: 0.95rem;
+        line-height: 1.8;
+    }
+
+    .terms-body ul li {
+        margin-bottom: 0.35rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="terms-section">
+    <div class="terms-header">
+        <div class="terms-badge">Legal</div>
+        <h1 class="terms-title">Terms and Conditions</h1>
+        <p class="terms-meta">Last updated: March 2026</p>
+    </div>
+
+    <div class="terms-body">
+
+        <h2>1. Acceptance of Terms</h2>
+        <p>
+            By accessing or using Spendly ("the Service"), you agree to be bound by these Terms and
+            Conditions. If you do not agree with any part of these terms, you may not use the Service.
+            These terms apply to all visitors, users, and others who access the Service.
+        </p>
+
+        <h2>2. Use of Service</h2>
+        <p>
+            Spendly is a personal expense tracking tool intended for individual, non-commercial use.
+            By using the Service, you agree to:
+        </p>
+        <ul>
+            <li>Provide accurate information when creating an account.</li>
+            <li>Keep your login credentials secure and not share them with others.</li>
+            <li>Use the Service only for lawful purposes and in a manner consistent with these terms.</li>
+            <li>Not attempt to gain unauthorised access to any part of the Service or its infrastructure.</li>
+            <li>Not use the Service to store or transmit any harmful, fraudulent, or illegal content.</li>
+        </ul>
+        <p>
+            We reserve the right to suspend or terminate accounts that violate these terms without prior notice.
+        </p>
+
+        <h2>3. User Data</h2>
+        <p>
+            You retain ownership of all financial data you enter into Spendly. We collect and store
+            only the information necessary to provide the Service, including your account details
+            and expense records.
+        </p>
+        <p>
+            We do not sell, rent, or share your personal data with third parties for marketing purposes.
+            Your data may be used in aggregated, anonymised form to improve the Service. You may
+            delete your account and associated data at any time by contacting us or using the
+            account settings page.
+        </p>
+        <p>
+            While we take reasonable precautions to protect your data, no method of transmission or
+            storage is 100% secure. You acknowledge that you provide data at your own risk.
+        </p>
+
+        <h2>4. Limitation of Liability</h2>
+        <p>
+            Spendly is provided on an "as is" and "as available" basis without warranties of any kind,
+            either express or implied. We do not guarantee that the Service will be uninterrupted,
+            error-free, or completely secure.
+        </p>
+        <p>
+            To the fullest extent permitted by applicable law, Spendly and its creators shall not be
+            liable for any indirect, incidental, special, consequential, or punitive damages arising
+            from your use of — or inability to use — the Service. This includes, but is not limited
+            to, loss of data, loss of revenue, or financial decisions made based on information
+            displayed within the Service.
+        </p>
+        <p>
+            Spendly is a personal tracking tool and does not provide financial advice. Always consult
+            a qualified financial professional for decisions that affect your finances.
+        </p>
+
+        <h2>5. Changes to Terms</h2>
+        <p>
+            We reserve the right to update or modify these Terms and Conditions at any time. When we
+            make changes, we will update the "Last updated" date at the top of this page. Continued
+            use of the Service after any changes constitutes your acceptance of the new terms.
+        </p>
+        <p>
+            We encourage you to review these terms periodically. If a change materially affects your
+            rights, we will make reasonable efforts to notify you via the email address associated
+            with your account.
+        </p>
+
+    </div>
+</div>
+{% endblock %}
