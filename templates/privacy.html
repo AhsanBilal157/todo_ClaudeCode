@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy — Spendly{% endblock %}
+
+{% block head %}
+<style>
+    .terms-section {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 4rem 2rem 6rem;
+    }
+
+    .terms-header {
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .terms-badge {
+        display: inline-block;
+        background: var(--accent-light);
+        color: var(--accent);
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 0.35rem 0.85rem;
+        border-radius: 999px;
+        margin-bottom: 1.25rem;
+    }
+
+    .terms-title {
+        font-family: var(--font-display);
+        font-size: clamp(2rem, 4vw, 3rem);
+        line-height: 1.15;
+        color: var(--ink);
+        margin-bottom: 0.75rem;
+    }
+
+    .terms-meta {
+        font-size: 0.875rem;
+        color: var(--ink-faint);
+    }
+
+    .terms-body h2 {
+        font-family: var(--font-display);
+        font-size: 1.35rem;
+        color: var(--ink);
+        margin-top: 2.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .terms-body p {
+        font-size: 0.95rem;
+        color: var(--ink-muted);
+        line-height: 1.8;
+        margin-bottom: 1rem;
+    }
+
+    .terms-body ul {
+        margin: 0.5rem 0 1rem 1.5rem;
+        color: var(--ink-muted);
+        font-size: 0.95rem;
+        line-height: 1.8;
+    }
+
+    .terms-body ul li {
+        margin-bottom: 0.35rem;
+    }
+
+    .terms-body a {
+        color: var(--accent);
+        font-weight: 500;
+    }
+
+    .terms-body a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="terms-section">
+    <div class="terms-header">
+        <div class="terms-badge">Legal</div>
+        <h1 class="terms-title">Privacy Policy</h1>
+        <p class="terms-meta">Last updated: March 2026</p>
+    </div>
+
+    <div class="terms-body">
+
+        <p>
+            At Spendly, we take your privacy seriously. This Privacy Policy explains what information
+            we collect, how we use it, and the choices you have regarding your data. By using Spendly,
+            you agree to the practices described in this policy.
+        </p>
+
+        <h2>1. Data We Collect</h2>
+        <p>We collect only the information necessary to provide the Service. This includes:</p>
+        <ul>
+            <li><strong>Account information</strong> — your name, email address, and hashed password when you register.</li>
+            <li><strong>Expense records</strong> — amounts, categories, dates, and descriptions you enter manually.</li>
+            <li><strong>Usage data</strong> — basic logs such as pages visited and actions taken, used to diagnose issues and improve the Service.</li>
+            <li><strong>Device information</strong> — browser type and operating system, collected automatically when you access the Service.</li>
+        </ul>
+        <p>We do not collect payment information, government IDs, or any sensitive financial account details.</p>
+
+        <h2>2. How We Use Your Data</h2>
+        <p>The data we collect is used solely to operate and improve Spendly:</p>
+        <ul>
+            <li>To create and manage your account.</li>
+            <li>To display your expense history and summaries within the app.</li>
+            <li>To diagnose bugs and improve performance and reliability.</li>
+            <li>To send you important service-related notices (not marketing emails).</li>
+        </ul>
+        <p>
+            We do not sell, rent, or share your personal data with third parties for advertising or
+            marketing purposes. We will never use your financial data to target you with ads.
+        </p>
+
+        <h2>3. Data Storage</h2>
+        <p>
+            Your data is stored on secure servers. Passwords are hashed before storage and are never
+            stored or transmitted in plain text. We retain your data for as long as your account is
+            active.
+        </p>
+        <p>
+            You may request deletion of your account and all associated data at any time. Upon
+            deletion, your personal data will be permanently removed from our systems within 30 days,
+            except where retention is required by law.
+        </p>
+        <p>
+            While we implement industry-standard safeguards, no system is completely immune to
+            breaches. In the event of a data breach that affects your personal information, we will
+            notify you promptly via the email address on your account.
+        </p>
+
+        <h2>4. Third-Party Services</h2>
+        <p>
+            Spendly may use a limited number of third-party services to operate the platform (for
+            example, hosting providers). These providers are bound by confidentiality agreements and
+            are not permitted to use your data for their own purposes.
+        </p>
+        <p>
+            We do not integrate with third-party analytics platforms, advertising networks, or social
+            media trackers. Any future integrations will be disclosed in an updated version of this policy.
+        </p>
+
+        <h2>5. Contact Us</h2>
+        <p>
+            If you have questions, concerns, or requests regarding your privacy or this policy,
+            please reach out to us. We aim to respond to all privacy-related enquiries within 5
+            business days.
+        </p>
+        <p>
+            You can contact us via the support link in your account settings, or by emailing us
+            directly at <a href="mailto:privacy@spendly.app">privacy@spendly.app</a>.
+        </p>
+
+    </div>
+</div>
+{% endblock %}
