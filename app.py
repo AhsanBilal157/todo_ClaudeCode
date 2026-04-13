@@ -2,7 +2,7 @@ import re
 import sqlite3
 
 from flask import Flask, render_template, request, redirect, url_for, session
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from database.db import get_db, init_db, seed_db
 
@@ -28,6 +28,9 @@ def landing():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    if session.get("user_id"):
+        return redirect(url_for("landing"))
+
     if request.method == "GET":
         return render_template("register.html")
 
@@ -56,12 +59,11 @@ def register():
             )
 
         try:
-            cursor = conn.execute(
+            conn.execute(
                 "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
                 (name, email, generate_password_hash(password)),
             )
             conn.commit()
-            new_user_id = cursor.lastrowid
         except sqlite3.IntegrityError:
             return render_template(
                 "register.html",
@@ -70,13 +72,37 @@ def register():
     finally:
         conn.close()
 
-    session["user_id"] = new_user_id
-    return redirect(url_for("profile"))
+    return redirect(url_for("login"))
 
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    return render_template("login.html")
+    if session.get("user_id"):
+        return redirect(url_for("landing"))
+
+    if request.method == "GET":
+        return render_template("login.html")
+
+    email = request.form.get("email", "").strip().lower()
+    password = request.form.get("password", "")
+    error = "Invalid email or password."
+
+    if not email or not password:
+        return render_template("login.html", error=error)
+
+    conn = get_db()
+    try:
+        user = conn.execute(
+            "SELECT id, password_hash FROM users WHERE email = ?", (email,)
+        ).fetchone()
+    finally:
+        conn.close()
+
+    if user is None or not check_password_hash(user["password_hash"], password):
+        return render_template("login.html", error=error)
+
+    session["user_id"] = user["id"]
+    return redirect(url_for("landing"))
 
 
 # ------------------------------------------------------------------ #
@@ -85,7 +111,8 @@ def login():
 
 @app.route("/logout")
 def logout():
-    return "Logout — coming in Step 3"
+    session.pop("user_id", None)
+    return redirect(url_for("landing"))
 
 
 @app.route("/profile")
