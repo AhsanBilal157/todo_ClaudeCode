@@ -1,5 +1,6 @@
 import re
 import sqlite3
+from datetime import datetime
 
 from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -72,7 +73,7 @@ def register():
     finally:
         conn.close()
 
-    return redirect(url_for("login"))
+    return redirect(url_for("profile"))
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -102,7 +103,7 @@ def login():
         return render_template("login.html", error=error)
 
     session["user_id"] = user["id"]
-    return redirect(url_for("landing"))
+    return redirect(url_for("profile"))
 
 
 # ------------------------------------------------------------------ #
@@ -117,7 +118,68 @@ def logout():
 
 @app.route("/profile")
 def profile():
-    return "Profile page — coming in Step 4"
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    conn = get_db()
+    try:
+        user = conn.execute(
+            "SELECT id, name, email, created_at FROM users WHERE id = ?",
+            (session["user_id"],),
+        ).fetchone()
+    finally:
+        conn.close()
+
+    if user is None:
+        session.pop("user_id", None)
+        return redirect(url_for("login"))
+
+    member_since = "—"
+    if user["created_at"]:
+        try:
+            dt = datetime.strptime(user["created_at"], "%Y-%m-%d %H:%M:%S")
+            member_since = f"{dt:%B %Y}"
+        except ValueError:
+            member_since = "—"
+
+    initials = "".join(part[0] for part in user["name"].split()[:2]).upper() or "?"
+
+    # Demo data for design preview only — replaced by real DB query in Step 07.
+    demo_stats = {
+        "total_spent": 48250,
+        "transactions": 12,
+        "top_category": "Food",
+    }
+    demo_expenses = [
+        {"date": "Apr 16, 2026", "description": "Grocery run — Imtiaz",     "category": "Food",          "amount": 6420},
+        {"date": "Apr 15, 2026", "description": "Careem to airport",        "category": "Transport",     "amount": 1850},
+        {"date": "Apr 14, 2026", "description": "Electricity bill",         "category": "Bills",         "amount": 9300},
+        {"date": "Apr 13, 2026", "description": "Pharmacy — allergy meds",  "category": "Health",        "amount": 1120},
+        {"date": "Apr 12, 2026", "description": "Cinepax — evening show",   "category": "Entertainment", "amount": 2400},
+        {"date": "Apr 11, 2026", "description": "Daraz — desk lamp",        "category": "Shopping",      "amount": 3750},
+        {"date": "Apr 10, 2026", "description": "Misc — gift wrap",         "category": "Other",         "amount":  600},
+    ]
+    demo_breakdown = [
+        {"category": "Food",          "amount": 14200},
+        {"category": "Bills",         "amount": 12050},
+        {"category": "Transport",     "amount":  7400},
+        {"category": "Shopping",      "amount":  5100},
+        {"category": "Entertainment", "amount":  3200},
+        {"category": "Health",        "amount":  1700},
+        {"category": "Other",         "amount":   600},
+    ]
+    breakdown_max = max((b["amount"] for b in demo_breakdown), default=1)
+
+    return render_template(
+        "profile.html",
+        user=user,
+        initials=initials,
+        member_since=member_since,
+        demo_stats=demo_stats,
+        demo_expenses=demo_expenses,
+        demo_breakdown=demo_breakdown,
+        breakdown_max=breakdown_max,
+    )
 
 
 @app.route("/expenses/add")

@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Profile — Spendly{% endblock %}
+
+{% set bd_total = demo_breakdown|sum(attribute='amount') %}
+{% set cat_icon = {
+    'Food': 'utensils',
+    'Transport': 'car-front',
+    'Bills': 'receipt',
+    'Health': 'heart-pulse',
+    'Entertainment': 'film',
+    'Shopping': 'shopping-bag',
+    'Other': 'tag'
+} %}
+
+{% block content %}
+
+{# Demo data on this page is for design preview only — replaced in Step 07. #}
+
+<section class="profile-section">
+    <div class="profile-container">
+
+        <!-- HERO -->
+        <article class="profile-hero">
+            <div class="profile-hero-main">
+                <div class="profile-hero-avatar">{{ initials }}</div>
+                <div class="profile-hero-id">
+                    <h1 class="profile-hero-name">{{ user.name }}</h1>
+                    <p class="profile-hero-email">{{ user.email }}</p>
+                </div>
+            </div>
+            <div class="profile-hero-meta">
+                <span class="profile-hero-pill">
+                    <i data-lucide="calendar"></i>
+                    Member since {{ member_since }}
+                </span>
+                <span class="profile-hero-pill profile-hero-pill-success">
+                    <i data-lucide="shield-check"></i>
+                    Verified account
+                </span>
+            </div>
+        </article>
+
+        <!-- STATS -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-head">
+                    <span class="stat-icon stat-icon-accent"><i data-lucide="wallet"></i></span>
+                    <span class="stat-label">Total spent</span>
+                </div>
+                <span class="stat-value">PKR {{ "{:,}".format(demo_stats.total_spent) }}</span>
+                <div class="stat-foot">
+                    <span class="stat-delta stat-delta-up">
+                        <i data-lucide="arrow-up-right"></i> 8.2%
+                    </span>
+                    <span class="stat-foot-text">vs last month</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-head">
+                    <span class="stat-icon stat-icon-amber"><i data-lucide="arrow-down-up"></i></span>
+                    <span class="stat-label">Transactions</span>
+                </div>
+                <span class="stat-value">{{ demo_stats.transactions }}</span>
+                <div class="stat-foot">
+                    <span class="stat-foot-text">across {{ demo_breakdown|length }} categories</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-head">
+                    <span class="stat-icon stat-icon-accent"><i data-lucide="trending-up"></i></span>
+                    <span class="stat-label">Top category</span>
+                </div>
+                <span class="stat-value">{{ demo_stats.top_category }}</span>
+                <div class="stat-foot">
+                    {% set top_amt = (demo_breakdown|selectattr('category','equalto',demo_stats.top_category)|map(attribute='amount')|first) or 0 %}
+                    <span class="stat-foot-text">{{ ((top_amt / bd_total) * 100)|round(0)|int }}% of monthly spend</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TRANSACTIONS -->
+        <section class="profile-panel">
+            <header class="panel-header">
+                <div class="panel-title-wrap">
+                    <h2 class="panel-title">Recent transactions</h2>
+                    <p class="panel-sub">Your last {{ demo_expenses|length }} expenses</p>
+                </div>
+                <div class="panel-tools">
+                    <span class="filter-pill is-active">This month</span>
+                    <span class="filter-pill">Last month</span>
+                    <span class="filter-pill">All</span>
+                </div>
+            </header>
+
+            <div class="tx-table-wrap">
+                <table class="tx-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th class="tx-amount">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for e in demo_expenses %}
+                        <tr>
+                            <td class="tx-date">{{ e.date }}</td>
+                            <td>
+                                <div class="tx-desc">
+                                    <span class="tx-desc-icon cat-{{ e.category|lower }}">
+                                        <i data-lucide="{{ cat_icon[e.category] }}"></i>
+                                    </span>
+                                    <span class="tx-desc-text">{{ e.description }}</span>
+                                </div>
+                            </td>
+                            <td><span class="tx-pill cat-{{ e.category|lower }}">{{ e.category }}</span></td>
+                            <td class="tx-amount">PKR {{ "{:,}".format(e.amount) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- BREAKDOWN -->
+        <section class="profile-panel">
+            <header class="panel-header">
+                <div class="panel-title-wrap">
+                    <h2 class="panel-title">Category breakdown</h2>
+                    <p class="panel-sub">Total this month — PKR {{ "{:,}".format(bd_total) }}</p>
+                </div>
+            </header>
+
+            <div class="bd-list">
+                {% for b in demo_breakdown %}
+                {% set pct = (b.amount / bd_total * 100) %}
+                <div class="bd-row">
+                    <div class="bd-cat">
+                        <span class="bd-cat-dot bar-{{ b.category|lower }}"></span>
+                        <span class="bd-cat-name">{{ b.category }}</span>
+                    </div>
+                    <div class="bd-track">
+                        <div class="bd-fill bar-{{ b.category|lower }}"
+                             style="width: {{ (b.amount / breakdown_max * 100)|round(0, 'floor') }}%;"></div>
+                    </div>
+                    <div class="bd-meta">
+                        <span class="bd-amount">PKR {{ "{:,}".format(b.amount) }}</span>
+                        <span class="bd-pct">{{ pct|round(1) }}%</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+    </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>lucide.createIcons();</script>
+{% endblock %}
