@@ -46,7 +46,7 @@
                     <span class="stat-icon stat-icon-accent"><i data-lucide="wallet"></i></span>
                     <span class="stat-label">Total spent</span>
                 </div>
-                <span class="stat-value">₹ {{ "{:,.2f}".format(stats.total_spent) }}</span>
+                <span class="stat-value">PKR {{ "{:,.2f}".format(stats.total_spent) }}</span>
                 <div class="stat-foot">
                     <span class="stat-foot-text">Updated just now</span>
                 </div>
@@ -88,9 +88,12 @@
                     <p class="panel-sub">Your last {{ expenses|length }} expense{{ '' if expenses|length == 1 else 's' }}</p>
                 </div>
                 <div class="panel-tools">
-                    <span class="filter-pill is-active">This month</span>
-                    <span class="filter-pill">Last month</span>
-                    <span class="filter-pill">All</span>
+                    <a class="filter-pill{% if tx_range == 'this_month' %} is-active{% endif %}"
+                       href="{{ url_for('profile', range='this_month') }}">This month</a>
+                    <a class="filter-pill{% if tx_range == 'last_month' %} is-active{% endif %}"
+                       href="{{ url_for('profile', range='last_month') }}">Last month</a>
+                    <a class="filter-pill{% if tx_range == 'all' %} is-active{% endif %}"
+                       href="{{ url_for('profile', range='all') }}">All</a>
                 </div>
             </header>
 
@@ -118,7 +121,7 @@
                                 </div>
                             </td>
                             <td><span class="tx-pill cat-{{ e.category|lower }}">{{ e.category }}</span></td>
-                            <td class="tx-amount">₹ {{ "{:,.2f}".format(e.amount) }}</td>
+                            <td class="tx-amount">PKR {{ "{:,.2f}".format(e.amount) }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -137,7 +140,7 @@
             <header class="panel-header">
                 <div class="panel-title-wrap">
                     <h2 class="panel-title">Category breakdown</h2>
-                    <p class="panel-sub">Total this month — ₹ {{ "{:,.2f}".format(bd_total) }}</p>
+                    <p class="panel-sub">Total this month — PKR {{ "{:,.2f}".format(bd_total) }}</p>
                 </div>
             </header>
 
@@ -154,7 +157,7 @@
                              style="width: {{ ((b.pct / breakdown_max_pct) * 100)|round(0, 'floor') }}%;"></div>
                     </div>
                     <div class="bd-meta">
-                        <span class="bd-amount">₹ {{ "{:,.2f}".format(b.amount) }}</span>
+                        <span class="bd-amount">PKR {{ "{:,.2f}".format(b.amount) }}</span>
                         <span class="bd-pct">{{ b.pct }}%</span>
                     </div>
                 </div>

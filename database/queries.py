@@ -77,22 +77,31 @@ def get_summary_stats(user_id):
     }
 
 
-def get_recent_transactions(user_id, limit=10):
+TX_RANGES = ("this_month", "last_month", "all")
+
+
+def get_recent_transactions(user_id, limit=10, period="all"):
     """Return list of {'date', 'description', 'category', 'amount'} dicts.
 
     Ordered newest date first, tiebreak by id DESC. Date formatted 'Mon DD, YYYY'.
-    Empty list when user has no expenses.
+    `period` filters by date: 'this_month', 'last_month', or 'all' (default).
+    Unknown periods fall back to 'all'. Empty list when user has no expenses.
     """
+    if period not in TX_RANGES:
+        period = "all"
+
+    date_clause = ""
+    if period == "this_month":
+        date_clause = " AND strftime('%Y-%m', date) = strftime('%Y-%m', 'now')"
+    elif period == "last_month":
+        date_clause = " AND strftime('%Y-%m', date) = strftime('%Y-%m', 'now', '-1 month')"
+
     conn = get_db()
     try:
         rows = conn.execute(
-            """
-            SELECT id, date, description, category, amount
-            FROM expenses
-            WHERE user_id = ?
-            ORDER BY date DESC, id DESC
-            LIMIT ?
-            """,
+            "SELECT id, date, description, category, amount FROM expenses "
+            "WHERE user_id = ?" + date_clause +
+            " ORDER BY date DESC, id DESC LIMIT ?",
             (user_id, limit),
         ).fetchall()
     finally:

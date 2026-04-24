@@ -126,9 +126,13 @@ def profile():
         session.pop("user_id", None)
         return redirect(url_for("login"))
 
+    tx_range = request.args.get("range", "this_month")
+    if tx_range not in queries.TX_RANGES:
+        tx_range = "this_month"
+
     user_id = session["user_id"]
     stats = queries.get_summary_stats(user_id)
-    expenses = queries.get_recent_transactions(user_id, limit=10)
+    expenses = queries.get_recent_transactions(user_id, limit=10, period=tx_range)
     breakdown = queries.get_category_breakdown(user_id)
     breakdown_max_pct = max((b["pct"] for b in breakdown), default=1)
 
@@ -143,6 +147,7 @@ def profile():
         expenses=expenses,
         breakdown=breakdown,
         breakdown_max_pct=breakdown_max_pct,
+        tx_range=tx_range,
     )
 
 

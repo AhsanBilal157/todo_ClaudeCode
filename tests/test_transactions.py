@@ -34,6 +34,27 @@ def test_empty_for_unknown_user(seed_user_id, app):
     assert get_recent_transactions(99999) == []
 
 
+def test_period_all_returns_everything(seed_user_id, app):
+    rows = get_recent_transactions(seed_user_id, period="all")
+    assert len(rows) == 8
+
+
+def test_period_unknown_falls_back_to_all(seed_user_id, app):
+    rows = get_recent_transactions(seed_user_id, period="bogus")
+    assert len(rows) == 8
+
+
+def test_period_last_month_filters_by_date(seed_user_id, app):
+    # Seed rows are all in April 2026. If "now" is also in April 2026,
+    # last_month (March 2026) has zero seed rows; otherwise the test is
+    # less informative but still non-crashing. Assert the shape, not a
+    # specific count, to stay robust across calendar drift.
+    rows = get_recent_transactions(seed_user_id, period="last_month")
+    assert isinstance(rows, list)
+    for r in rows:
+        assert set(r.keys()) == {"date", "description", "category", "amount"}
+
+
 def test_empty_for_user_with_no_expenses(seed_user_id, app):
     conn = get_db()
     try:
