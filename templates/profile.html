@@ -2,7 +2,7 @@
 
 {% block title %}Profile — Spendly{% endblock %}
 
-{% set bd_total = demo_breakdown|sum(attribute='amount') %}
+{% set bd_total = breakdown|sum(attribute='amount') %}
 {% set cat_icon = {
     'Food': 'utensils',
     'Transport': 'car-front',
@@ -14,8 +14,6 @@
 } %}
 
 {% block content %}
-
-{# Demo data on this page is for design preview only — replaced in Step 07. #}
 
 <section class="profile-section">
     <div class="profile-container">
@@ -48,12 +46,9 @@
                     <span class="stat-icon stat-icon-accent"><i data-lucide="wallet"></i></span>
                     <span class="stat-label">Total spent</span>
                 </div>
-                <span class="stat-value">PKR {{ "{:,}".format(demo_stats.total_spent) }}</span>
+                <span class="stat-value">PKR {{ "{:,.2f}".format(stats.total_spent) }}</span>
                 <div class="stat-foot">
-                    <span class="stat-delta stat-delta-up">
-                        <i data-lucide="arrow-up-right"></i> 8.2%
-                    </span>
-                    <span class="stat-foot-text">vs last month</span>
+                    <span class="stat-foot-text">Updated just now</span>
                 </div>
             </div>
 
@@ -62,9 +57,9 @@
                     <span class="stat-icon stat-icon-amber"><i data-lucide="arrow-down-up"></i></span>
                     <span class="stat-label">Transactions</span>
                 </div>
-                <span class="stat-value">{{ demo_stats.transactions }}</span>
+                <span class="stat-value">{{ stats.transaction_count }}</span>
                 <div class="stat-foot">
-                    <span class="stat-foot-text">across {{ demo_breakdown|length }} categories</span>
+                    <span class="stat-foot-text">across {{ breakdown|length }} categor{{ 'y' if breakdown|length == 1 else 'ies' }}</span>
                 </div>
             </div>
 
@@ -73,10 +68,14 @@
                     <span class="stat-icon stat-icon-accent"><i data-lucide="trending-up"></i></span>
                     <span class="stat-label">Top category</span>
                 </div>
-                <span class="stat-value">{{ demo_stats.top_category }}</span>
+                <span class="stat-value">{{ stats.top_category }}</span>
                 <div class="stat-foot">
-                    {% set top_amt = (demo_breakdown|selectattr('category','equalto',demo_stats.top_category)|map(attribute='amount')|first) or 0 %}
-                    <span class="stat-foot-text">{{ ((top_amt / bd_total) * 100)|round(0)|int }}% of monthly spend</span>
+                    {% if breakdown and bd_total > 0 %}
+                        {% set top_amt = (breakdown|selectattr('name','equalto',stats.top_category)|map(attribute='amount')|first) or 0 %}
+                        <span class="stat-foot-text">{{ ((top_amt / bd_total) * 100)|round(0)|int }}% of monthly spend</span>
+                    {% else %}
+                        <span class="stat-foot-text">No spend yet</span>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -86,15 +85,19 @@
             <header class="panel-header">
                 <div class="panel-title-wrap">
                     <h2 class="panel-title">Recent transactions</h2>
-                    <p class="panel-sub">Your last {{ demo_expenses|length }} expenses</p>
+                    <p class="panel-sub">Your last {{ expenses|length }} expense{{ '' if expenses|length == 1 else 's' }}</p>
                 </div>
                 <div class="panel-tools">
-                    <span class="filter-pill is-active">This month</span>
-                    <span class="filter-pill">Last month</span>
-                    <span class="filter-pill">All</span>
+                    <a class="filter-pill{% if tx_range == 'this_month' %} is-active{% endif %}"
+                       href="{{ url_for('profile', range='this_month') }}">This month</a>
+                    <a class="filter-pill{% if tx_range == 'last_month' %} is-active{% endif %}"
+                       href="{{ url_for('profile', range='last_month') }}">Last month</a>
+                    <a class="filter-pill{% if tx_range == 'all' %} is-active{% endif %}"
+                       href="{{ url_for('profile', range='all') }}">All</a>
                 </div>
             </header>
 
+            {% if expenses %}
             <div class="tx-table-wrap">
                 <table class="tx-table">
                     <thead>
@@ -106,24 +109,30 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for e in demo_expenses %}
+                        {% for e in expenses %}
                         <tr>
                             <td class="tx-date">{{ e.date }}</td>
                             <td>
                                 <div class="tx-desc">
                                     <span class="tx-desc-icon cat-{{ e.category|lower }}">
-                                        <i data-lucide="{{ cat_icon[e.category] }}"></i>
+                                        <i data-lucide="{{ cat_icon.get(e.category, 'tag') }}"></i>
                                     </span>
                                     <span class="tx-desc-text">{{ e.description }}</span>
                                 </div>
                             </td>
                             <td><span class="tx-pill cat-{{ e.category|lower }}">{{ e.category }}</span></td>
-                            <td class="tx-amount">PKR {{ "{:,}".format(e.amount) }}</td>
+                            <td class="tx-amount">PKR {{ "{:,.2f}".format(e.amount) }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+            {% else %}
+            <div class="tx-empty">
+                <p>You haven't logged any expenses yet.</p>
+                <a class="btn-primary" href="{{ url_for('add_expense') }}">Add your first expense</a>
+            </div>
+            {% endif %}
         </section>
 
         <!-- BREAKDOWN -->
@@ -131,29 +140,32 @@
             <header class="panel-header">
                 <div class="panel-title-wrap">
                     <h2 class="panel-title">Category breakdown</h2>
-                    <p class="panel-sub">Total this month — PKR {{ "{:,}".format(bd_total) }}</p>
+                    <p class="panel-sub">Total this month — PKR {{ "{:,.2f}".format(bd_total) }}</p>
                 </div>
             </header>
 
+            {% if breakdown %}
             <div class="bd-list">
-                {% for b in demo_breakdown %}
-                {% set pct = (b.amount / bd_total * 100) %}
+                {% for b in breakdown %}
                 <div class="bd-row">
                     <div class="bd-cat">
-                        <span class="bd-cat-dot bar-{{ b.category|lower }}"></span>
-                        <span class="bd-cat-name">{{ b.category }}</span>
+                        <span class="bd-cat-dot bar-{{ b.name|lower }}"></span>
+                        <span class="bd-cat-name">{{ b.name }}</span>
                     </div>
                     <div class="bd-track">
-                        <div class="bd-fill bar-{{ b.category|lower }}"
-                             style="width: {{ (b.amount / breakdown_max * 100)|round(0, 'floor') }}%;"></div>
+                        <div class="bd-fill bar-{{ b.name|lower }}"
+                             style="width: {{ ((b.pct / breakdown_max_pct) * 100)|round(0, 'floor') }}%;"></div>
                     </div>
                     <div class="bd-meta">
-                        <span class="bd-amount">PKR {{ "{:,}".format(b.amount) }}</span>
-                        <span class="bd-pct">{{ pct|round(1) }}%</span>
+                        <span class="bd-amount">PKR {{ "{:,.2f}".format(b.amount) }}</span>
+                        <span class="bd-pct">{{ b.pct }}%</span>
                     </div>
                 </div>
                 {% endfor %}
             </div>
+            {% else %}
+            <p class="bd-empty">Log some expenses to see your category breakdown.</p>
+            {% endif %}
         </section>
 
     </div>
