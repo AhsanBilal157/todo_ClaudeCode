@@ -95,7 +95,17 @@
                     <a class="filter-pill{% if tx_range == 'all' %} is-active{% endif %}"
                        href="{{ url_for('profile', range='all') }}">All</a>
                 </div>
+                <form method="get" action="{{ url_for('profile') }}" class="filter-form">
+                    <input type="date" class="filter-date" name="from" value="{{ date_from }}" aria-label="From">
+                    <input type="date" class="filter-date" name="to" value="{{ date_to }}" aria-label="To">
+                    <button type="submit" class="filter-apply">Apply</button>
+                    <a class="filter-clear" href="{{ url_for('profile') }}">Clear</a>
+                </form>
             </header>
+
+            {% if filter_error %}
+            <p class="filter-error">{{ filter_error }}</p>
+            {% endif %}
 
             {% if expenses %}
             <div class="tx-table-wrap">

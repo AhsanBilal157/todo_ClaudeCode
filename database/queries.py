@@ -80,18 +80,31 @@ def get_summary_stats(user_id):
 TX_RANGES = ("this_month", "last_month", "all")
 
 
-def get_recent_transactions(user_id, limit=10, period="all"):
+def get_recent_transactions(user_id, limit=10, period="all", date_from=None, date_to=None):
     """Return list of {'date', 'description', 'category', 'amount'} dicts.
 
     Ordered newest date first, tiebreak by id DESC. Date formatted 'Mon DD, YYYY'.
     `period` filters by date: 'this_month', 'last_month', or 'all' (default).
     Unknown periods fall back to 'all'. Empty list when user has no expenses.
+
+    `date_from` / `date_to` (YYYY-MM-DD strings) take precedence over `period`
+    when either is set, applying inclusive `date >= ?` / `date <= ?` filters.
     """
-    if period not in TX_RANGES:
+    use_custom = bool(date_from) or bool(date_to)
+
+    if not use_custom and period not in TX_RANGES:
         period = "all"
 
     date_clause = ""
-    if period == "this_month":
+    extra_params = []
+    if use_custom:
+        if date_from:
+            date_clause += " AND date >= ?"
+            extra_params.append(date_from)
+        if date_to:
+            date_clause += " AND date <= ?"
+            extra_params.append(date_to)
+    elif period == "this_month":
         date_clause = " AND strftime('%Y-%m', date) = strftime('%Y-%m', 'now')"
     elif period == "last_month":
         date_clause = " AND strftime('%Y-%m', date) = strftime('%Y-%m', 'now', '-1 month')"
@@ -102,7 +115,7 @@ def get_recent_transactions(user_id, limit=10, period="all"):
             "SELECT id, date, description, category, amount FROM expenses "
             "WHERE user_id = ?" + date_clause +
             " ORDER BY date DESC, id DESC LIMIT ?",
-            (user_id, limit),
+            (user_id, *extra_params, limit),
         ).fetchall()
     finally:
         conn.close()
