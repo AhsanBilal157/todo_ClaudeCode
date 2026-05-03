@@ -95,6 +95,7 @@
                     <a class="filter-pill{% if tx_range == 'all' %} is-active{% endif %}"
                        href="{{ url_for('profile', range='all') }}">All</a>
                 </div>
+                <a class="btn-primary" href="{{ url_for('add_expense') }}">+ Add expense</a>
                 <form method="get" action="{{ url_for('profile') }}" class="filter-form">
                     <input type="date" class="filter-date" name="from" value="{{ date_from }}" aria-label="From">
                     <input type="date" class="filter-date" name="to" value="{{ date_to }}" aria-label="To">
