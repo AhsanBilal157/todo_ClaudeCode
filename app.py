@@ -1,3 +1,4 @@
+import math
 import re
 import sqlite3
 from datetime import datetime
@@ -17,6 +18,10 @@ with app.app_context():
 
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+ALLOWED_CATEGORIES = ("Food", "Transport", "Bills", "Health",
+                      "Entertainment", "Shopping", "Other")
+DESCRIPTION_MAX = 200
 
 
 # ------------------------------------------------------------------ #
@@ -209,9 +214,56 @@ def analytics():
     return render_template("analytics.html")
 
 
-@app.route("/expenses/add")
+@app.route("/expenses/add", methods=["GET", "POST"])
 def add_expense():
-    return "Add expense — coming in Step 7"
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    if request.method == "GET":
+        return render_template(
+            "add_expense.html",
+            today=today, form={}, categories=ALLOWED_CATEGORIES,
+        )
+
+    form = {
+        "amount":      request.form.get("amount", "").strip(),
+        "category":    request.form.get("category", "").strip(),
+        "date":        request.form.get("date", "").strip(),
+        "description": request.form.get("description", "").strip(),
+    }
+
+    def fail(msg):
+        return render_template(
+            "add_expense.html",
+            today=today, form=form, error=msg,
+            categories=ALLOWED_CATEGORIES,
+        )
+
+    try:
+        amount = float(form["amount"])
+    except (TypeError, ValueError):
+        return fail("Please enter a valid amount.")
+    if math.isnan(amount) or math.isinf(amount) or amount <= 0:
+        return fail("Amount must be greater than zero.")
+
+    if form["category"] not in ALLOWED_CATEGORIES:
+        return fail("Please choose a valid category.")
+
+    try:
+        datetime.strptime(form["date"], "%Y-%m-%d")
+    except ValueError:
+        return fail("Please enter a valid date (YYYY-MM-DD).")
+
+    description = form["description"] or None
+    if description and len(description) > DESCRIPTION_MAX:
+        return fail(f"Description must be {DESCRIPTION_MAX} characters or fewer.")
+
+    queries.add_expense(
+        session["user_id"], amount, form["category"], form["date"], description,
+    )
+    return redirect(url_for("profile"))
 
 
 @app.route("/expenses/<int:id>/edit")

@@ -177,3 +177,21 @@ def get_category_breakdown(user_id):
         result.append({"name": name, "amount": amount, "pct": pct})
 
     return result
+
+
+def add_expense(user_id, amount, category, date, description):
+    """Insert one expense row for user_id; return the new row id.
+
+    Caller is responsible for validation. `description` may be None.
+    """
+    conn = get_db()
+    try:
+        cur = conn.execute(
+            "INSERT INTO expenses (user_id, amount, category, date, description) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (user_id, amount, category, date, description),
+        )
+        conn.commit()
+        return cur.lastrowid
+    finally:
+        conn.close()
