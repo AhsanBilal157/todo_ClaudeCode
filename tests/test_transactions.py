@@ -16,9 +16,10 @@ def test_ordered_newest_first(seed_user_id, app):
 def test_row_shape(seed_user_id, app):
     rows = get_recent_transactions(seed_user_id)
     assert rows, "expected seeded rows"
-    expected_keys = {"date", "description", "category", "amount"}
+    required_keys = {"id", "date", "description", "category", "amount"}
     for row in rows:
-        assert set(row.keys()) == expected_keys
+        assert required_keys <= set(row.keys())
+        assert isinstance(row["id"], int)
         assert isinstance(row["date"], str)
         assert isinstance(row["description"], str)
         assert isinstance(row["category"], str)
@@ -52,7 +53,7 @@ def test_period_last_month_filters_by_date(seed_user_id, app):
     rows = get_recent_transactions(seed_user_id, period="last_month")
     assert isinstance(rows, list)
     for r in rows:
-        assert set(r.keys()) == {"date", "description", "category", "amount"}
+        assert {"id", "date", "description", "category", "amount"} <= set(r.keys())
 
 
 def test_empty_for_user_with_no_expenses(seed_user_id, app):

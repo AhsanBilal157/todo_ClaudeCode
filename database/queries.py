@@ -130,6 +130,7 @@ def get_recent_transactions(user_id, limit=10, period="all", date_from=None, dat
 
         results.append(
             {
+                "id": row["id"],
                 "date": formatted_date,
                 "description": row["description"] if row["description"] is not None else "",
                 "category": row["category"],
@@ -193,5 +194,54 @@ def add_expense(user_id, amount, category, date, description):
         )
         conn.commit()
         return cur.lastrowid
+    finally:
+        conn.close()
+
+
+def get_expense(expense_id, user_id):
+    """Return the expense row owned by user_id, or None.
+
+    Ownership is enforced in SQL — passing a row id that belongs to a
+    different user returns None, identical to "not found".
+    """
+    conn = get_db()
+    try:
+        row = conn.execute(
+            "SELECT id, user_id, amount, category, date, description "
+            "FROM expenses WHERE id = ? AND user_id = ?",
+            (expense_id, user_id),
+        ).fetchone()
+    finally:
+        conn.close()
+
+    if row is None:
+        return None
+
+    return {
+        "id": row["id"],
+        "user_id": row["user_id"],
+        "amount": float(row["amount"]),
+        "category": row["category"],
+        "date": row["date"],
+        "description": row["description"],
+    }
+
+
+def update_expense(expense_id, user_id, amount, category, date, description):
+    """Update one expense owned by user_id; return True iff one row changed.
+
+    Caller is responsible for validation. `description` may be None. The
+    `user_id` filter in the WHERE clause is the ownership check — the row
+    will not update if it belongs to a different user.
+    """
+    conn = get_db()
+    try:
+        cur = conn.execute(
+            "UPDATE expenses SET amount = ?, category = ?, date = ?, "
+            "description = ? WHERE id = ? AND user_id = ?",
+            (amount, category, date, description, expense_id, user_id),
+        )
+        conn.commit()
+        return cur.rowcount == 1
     finally:
         conn.close()
