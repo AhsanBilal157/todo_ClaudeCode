@@ -326,9 +326,17 @@ def edit_expense(id):
     return redirect(url_for("profile"))
 
 
-@app.route("/expenses/<int:id>/delete")
+@app.route("/expenses/<int:id>/delete", methods=["POST"])
 def delete_expense(id):
-    return "Delete expense — coming in Step 9"
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    expense = queries.get_expense(id, session["user_id"])
+    if expense is None:
+        abort(404)
+
+    queries.delete_expense(id, session["user_id"])
+    return redirect(url_for("profile"))
 
 
 @app.route("/terms")

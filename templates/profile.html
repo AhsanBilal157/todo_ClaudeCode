@@ -135,9 +135,17 @@
                             <td><span class="tx-pill cat-{{ e.category|lower }}">{{ e.category }}</span></td>
                             <td class="tx-amount">PKR {{ "{:,.2f}".format(e.amount) }}</td>
                             <td class="tx-actions">
-                                <a class="tx-edit" href="{{ url_for('edit_expense', id=e.id) }}" aria-label="Edit expense">
-                                    <i data-lucide="pencil"></i>
-                                </a>
+                                <div class="tx-action-group">
+                                    <a class="tx-edit" href="{{ url_for('edit_expense', id=e.id) }}" aria-label="Edit expense">
+                                        <i data-lucide="pencil"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('delete_expense', id=e.id) }}"
+                                          onsubmit="return confirm('Delete this expense?');">
+                                        <button type="submit" class="tx-delete" aria-label="Delete expense">
+                                            <i data-lucide="trash-2"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
