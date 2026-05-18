@@ -117,6 +117,7 @@
                             <th>Description</th>
                             <th>Category</th>
                             <th class="tx-amount">Amount</th>
+                            <th class="tx-actions"><span class="sr-only">Actions</span></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -133,6 +134,11 @@
                             </td>
                             <td><span class="tx-pill cat-{{ e.category|lower }}">{{ e.category }}</span></td>
                             <td class="tx-amount">PKR {{ "{:,.2f}".format(e.amount) }}</td>
+                            <td class="tx-actions">
+                                <a class="tx-edit" href="{{ url_for('edit_expense', id=e.id) }}" aria-label="Edit expense">
+                                    <i data-lucide="pencil"></i>
+                                </a>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

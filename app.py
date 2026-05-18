@@ -3,7 +3,7 @@ import re
 import sqlite3
 from datetime import datetime
 
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from database.db import get_db, init_db, seed_db
@@ -266,9 +266,64 @@ def add_expense():
     return redirect(url_for("profile"))
 
 
-@app.route("/expenses/<int:id>/edit")
+@app.route("/expenses/<int:id>/edit", methods=["GET", "POST"])
 def edit_expense(id):
-    return "Edit expense — coming in Step 8"
+    if not session.get("user_id"):
+        return redirect(url_for("login"))
+
+    expense = queries.get_expense(id, session["user_id"])
+    if expense is None:
+        abort(404)
+
+    if request.method == "GET":
+        form = {
+            "amount":      "{:.2f}".format(expense["amount"]),
+            "category":    expense["category"],
+            "date":        expense["date"],
+            "description": expense["description"] or "",
+        }
+        return render_template(
+            "edit_expense.html",
+            expense=expense, form=form, categories=ALLOWED_CATEGORIES,
+        )
+
+    form = {
+        "amount":      request.form.get("amount", "").strip(),
+        "category":    request.form.get("category", "").strip(),
+        "date":        request.form.get("date", "").strip(),
+        "description": request.form.get("description", "").strip(),
+    }
+
+    def fail(msg):
+        return render_template(
+            "edit_expense.html",
+            expense=expense, form=form, error=msg,
+            categories=ALLOWED_CATEGORIES,
+        )
+
+    try:
+        amount = float(form["amount"])
+    except (TypeError, ValueError):
+        return fail("Please enter a valid amount.")
+    if math.isnan(amount) or math.isinf(amount) or amount <= 0:
+        return fail("Amount must be greater than zero.")
+
+    if form["category"] not in ALLOWED_CATEGORIES:
+        return fail("Please choose a valid category.")
+
+    try:
+        datetime.strptime(form["date"], "%Y-%m-%d")
+    except ValueError:
+        return fail("Please enter a valid date (YYYY-MM-DD).")
+
+    description = form["description"] or None
+    if description and len(description) > DESCRIPTION_MAX:
+        return fail(f"Description must be {DESCRIPTION_MAX} characters or fewer.")
+
+    queries.update_expense(
+        id, session["user_id"], amount, form["category"], form["date"], description,
+    )
+    return redirect(url_for("profile"))
 
 
 @app.route("/expenses/<int:id>/delete")
